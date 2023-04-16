@@ -24,7 +24,7 @@ def pregunta_01():
     """
     
     num_filas = tbl0.shape[0]
-    return num_filas
+    return num_filas 
 
 
 def pregunta_02():
