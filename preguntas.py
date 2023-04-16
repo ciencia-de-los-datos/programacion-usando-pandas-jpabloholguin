@@ -164,9 +164,7 @@ def pregunta_09():
     39   39   E    5  1998-01-26  1998
 
     """
-    tbl0['_c3'] = pd.to_datetime(tbl0['_c3'], errors='coerce')
-    tbl0['año'] = tbl0['_c3'].dt.year
-    tbl0['año'] = tbl0['año'].astype('Int64')
+    tbl0["year"] = tbl0.apply(lambda x:x["_c3"][:4], axis =1) 
 
     return tbl0
 
@@ -186,10 +184,12 @@ def pregunta_10():
     4   E  1:1:2:3:3:4:5:5:5:6:7:8:8:9
     """
     
-    grouped_df = tbl0.groupby(['_c1'])['_c2'].apply(lambda x: ':'.join(sorted(x.astype(str)))).reset_index()
-
-    grouped_df = grouped_df.rename(columns={'_c2': '_c1'})
-    return grouped_df
+    data=tbl0.filter(items=("_c1","_c2"))
+    data=data.sort_values("_c2")
+    data["_c2"]=data["_c2"].astype(str)
+    tabla=data.groupby(["_c1"],as_index=False).aggregate({"_c2":":".join})
+    tabla.set_index("_c1", inplace=True)
+    return tabla
 
 
 def pregunta_11():
@@ -208,11 +208,11 @@ def pregunta_11():
     38   38      d,e
     39   39    a,d,f
     """
-    grouped_df2 = tbl1.groupby(['_c0'])['_c4'].apply(lambda x: ','.join(sorted(x.astype(str)))).reset_index()
-    grouped_df2 = grouped_df2.rename(columns={'_c4': '_c0'})
+    tbl1_agrupado = tbl1.groupby("_c0")["_c4"].apply(lambda x: ",".join(sorted(x))).reset_index()
+    tbl1_agrupado.columns = ["_c0", "_c4"]
 
 
-    return grouped_df2
+    return tbl1_agrupado
 
 
 def pregunta_12():
@@ -230,15 +230,13 @@ def pregunta_12():
     38   38                    eee:0,fff:9,iii:2
     39   39                    ggg:3,hhh:8,jjj:5
     """
-    
-    tbl2['_c5'] = tbl2.apply(lambda x: ':'.join(sorted([str(x['_c5a']), str(x['_c5b'])])), axis=1)
+    tbl2 = pd.read_csv("tbl2.tsv", sep='\t')
+    tbl2['_c5'] = tbl2['_c5a'] + ':' + tbl2['_c5b'].astype(str)
+    tbl2_agrup = tbl2.groupby('_c0')['_c5'].apply(lambda x: ','.join(sorted(x))).reset_index()
+    tbl2_agrup['_c5'] = tbl2_agrup['_c5'].astype(str)
+    tbl2_agrup.columns = ['_c0', '_c5']
 
-# Agrupar los valores de la columna _c5 por los valores de la columna _c0 y unirlos en una lista separada por ','
-    grouped_df3 = tbl2.groupby(['_c0'])['_c5'].apply(lambda x: ','.join(x)).reset_index()
-
-# Imprimir el nuevo DataFrame
-
-    return grouped_df3
+    return tbl2_agrup
 
 
 def pregunta_13():
